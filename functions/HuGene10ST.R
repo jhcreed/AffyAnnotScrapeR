@@ -14,14 +14,18 @@ options(stringsAsFactors=FALSE)
 
 #######################################################################################
 # load transcript cluster annotation, downloaded from Affymetrix.com 01/10/2017
-
-annot <- fread("HuGene-1_0-st-v1_download011017/HuGene-1_0-st-v1.na36.hg19.transcript.csv", 
-               sep=",", header=TRUE, skip=23, showProgress=FALSE)
+#windows
+annot <- fread("M:/lab/Lab_Gerke/ukb/AXIOM/AXIOM_UKB_WCSG.na35.annot.csv", 
+           sep=",", header=TRUE, skip=19, showProgress=FALSE)
+#mac
+annot <- fread("/Volumes/Lab_Gerke/ukb/AXIOM/Axiom_UKB_WSCG.na35.annot.csv",
+               sep=",",header=TRUE, skip=19, showProgress=FALSE)
 
 #######################################################################################
 # create lists of data frames which contain mRNA and gene level annotation 
 
 # x will be annot$mrna_assignment
+#not in AXIOM array
 getmrnaannot <- function(x) {
    list1 <- sapply(x, function(y) strsplit(y, " /// "), USE.NAMES=FALSE)
    list1 <- lapply(list1, function(x) {
@@ -40,7 +44,7 @@ getmrnaannot <- function(x) {
 mrnaannot <- sapply(annot$mrna_assignment, getmrnaannot, USE.NAMES=FALSE)
 names(mrnaannot) <- annot$transcript_cluster_id
 
-# x will be annot$gene_assignment
+# x will be annot$`Associated Gene`
 getgeneannot <- function(x) {
    list1 <- sapply(x, function(y) strsplit(y, " /// "), USE.NAMES=FALSE)
    list1 <- lapply(list1, function(x) {
@@ -50,11 +54,11 @@ getgeneannot <- function(x) {
    })
    list2 <- lapply(list1, function(x) {
       dat <- as.data.frame(matrix(unlist(x), nrow=length(x), byrow=TRUE), stringsAsFactors=FALSE)
-      if (ncol(dat)==1) {dat <- data.frame(t(rep("---", 5)))}
-      names(dat) <- c("accession", "gene_symbol", "gene_title", "cytoband", "entrez_gene_id")
+      if (ncol(dat)==1) {dat <- data.frame(t(rep("---", 7)))}
+      names(dat) <- c("transcript_accession", "SNP_gne_relationship", "distance", "unigene_cluster_id", "gene","ncbi_gene_name","genebank_description")
       return(dat)
    })
 }
-geneannot <- sapply(annot$gene_assignment, getgeneannot, USE.NAMES=FALSE)
-names(geneannot) <- annot$transcript_cluster_id
+geneannot <- sapply(annot$`Associated Gene`, getgeneannot, USE.NAMES=FALSE)
+names(geneannot) <- annot$`Probe Set ID`
 
